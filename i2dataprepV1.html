@@ -1,0 +1,1513 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>i2 Data Prep</title>
+    
+    <!-- External Libraries -->
+    <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" rel="stylesheet">
+    <link href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap5.min.css" rel="stylesheet">
+    
+    <style>
+        :root {
+            --primary-color: #2c3e50;
+            --secondary-color: #3498db;
+            --success-color: #27ae60;
+            --danger-color: #e74c3c;
+            --bg-light: #f8f9fa;
+            --text-dark: #2c3e50;
+        }
+        
+        * {
+            font-family: 'Kanit', sans-serif;
+            box-sizing: border-box;
+        }
+        
+        body {
+            margin: 0;
+            padding: 0;
+            height: 100vh;
+            overflow: hidden;
+            background-color: var(--bg-light);
+        }
+        
+        .app-container {
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+        }
+        
+        /* Top Navigation Bar */
+        .top-bar {
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+            color: white;
+            padding: 10px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        
+        .app-title {
+            font-size: 20px;
+            font-weight: 500;
+            margin: 0;
+        }
+        
+        .action-buttons {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+        
+        .file-input-wrapper {
+            position: relative;
+            overflow: hidden;
+            display: inline-block;
+        }
+        
+        .file-input-wrapper input[type=file] {
+            position: absolute;
+            left: -9999px;
+        }
+        
+        .file-input-label {
+            background-color: rgba(255,255,255,0.2);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s;
+            border: 1px solid rgba(255,255,255,0.3);
+            font-size: 14px;
+        }
+        
+        .file-input-label:hover {
+            background-color: rgba(255,255,255,0.3);
+        }
+        
+        /* Status Bar */
+        .status-bar {
+            background-color: white;
+            border-bottom: 1px solid #dee2e6;
+            padding: 10px 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 20px;
+            font-size: 14px;
+        }
+        
+        .status-left {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+        
+        .status-right {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            font-weight: 600;
+            color: var(--primary-color);
+        }
+        
+        .status-item {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        
+        .status-label {
+            font-weight: 500;
+            color: var(--primary-color);
+        }
+        
+        .status-value {
+            color: #6c757d;
+        }
+        
+        /* Content Area */
+        .content-area {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+        
+        /* Tab Navigation */
+        .nav-tabs {
+            background-color: white;
+            border-bottom: 2px solid #dee2e6;
+            padding: 0 20px;
+        }
+        
+        .nav-tabs .nav-link {
+            color: #6c757d;
+            border: none;
+            border-radius: 0;
+            padding: 12px 20px;
+            font-weight: 500;
+            transition: all 0.3s;
+        }
+        
+        .nav-tabs .nav-link:hover {
+            color: var(--primary-color);
+            background-color: transparent;
+        }
+        
+        .nav-tabs .nav-link.active {
+            color: var(--secondary-color);
+            background-color: transparent;
+            border-bottom: 3px solid var(--secondary-color);
+        }
+        
+        /* Tab Content */
+        .tab-content {
+            flex: 1;
+            overflow: hidden;
+            background-color: white;
+            padding: 20px;
+        }
+        
+        .tab-pane {
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .tab-pane.active {
+            display: flex !important;
+        }
+        
+        /* Table Container */
+        .table-container {
+            flex: 1;
+            overflow: hidden;
+            border: 1px solid #dee2e6;
+            border-radius: 5px;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            height: calc(100vh - 280px);
+            min-height: 400px;
+        }
+        
+        /* Table scroll wrapper */
+        .table-scroll-wrapper {
+            flex: 1;
+            overflow: auto;
+            width: 100%;
+            height: 100%;
+            position: relative;
+        }
+        
+        .table-scroll-wrapper table {
+            width: auto !important;
+            min-width: 100%;
+        }
+        
+        /* Text nowrap class */
+        .text-nowrap {
+            white-space: nowrap !important;
+        }
+        
+        /* Fix for DataTables wrapper height */
+        .dataTables_wrapper {
+            height: auto !important;
+        }
+        
+        /* DataTable Styling */
+        table.dataTable {
+            width: 100% !important;
+            margin: 0 !important;
+            border-collapse: separate !important;
+            border-spacing: 0 !important;
+        }
+        
+        /* Force consistent column widths */
+        .dataTables_scrollHeadInner,
+        .dataTables_scrollBodyInner {
+            width: 100% !important;
+        }
+        
+        .dataTables_scrollHeadInner table,
+        .dataTables_scrollBodyInner table {
+            width: 100% !important;
+            table-layout: fixed !important;
+        }
+        
+        table.dataTable thead th,
+        table.dataTable tbody td {
+            box-sizing: border-box !important;
+        }
+        
+        table.dataTable thead th {
+            background-color: var(--bg-light);
+            color: var(--text-dark);
+            font-weight: 600;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+            white-space: nowrap;
+            padding: 10px !important;
+            border-bottom: 2px solid #dee2e6;
+            text-align: left;
+            border-right: 1px solid #ddd;
+        }
+        
+        table.dataTable thead th:last-child {
+            border-right: none;
+        }
+        
+        table.dataTable tbody td {
+            padding: 8px 10px !important;
+            white-space: nowrap;
+            vertical-align: middle;
+            text-align: left;
+            border-right: 1px solid #ddd;
+            border-bottom: 1px solid #ddd;
+        }
+        
+        table.dataTable tbody td:last-child {
+            border-right: none;
+        }
+        
+        .deposit-value {
+            color: var(--success-color) !important;
+            font-weight: 600 !important;
+        }
+        
+        .withdrawal-value {
+            color: var(--danger-color) !important;
+            font-weight: 600 !important;
+        }
+        
+        /* Fix DataTable alignment */
+        .dataTables_scrollHead {
+            overflow: hidden !important;
+            position: relative;
+            width: 100%;
+        }
+        
+        .dataTables_scrollBody {
+            border-top: none !important;
+            overflow: auto !important;
+            width: 100%;
+        }
+        
+        .dataTables_scrollHeadInner {
+            box-sizing: content-box !important;
+            width: 100% !important;
+            padding-right: 0 !important;
+        }
+        
+        .dataTables_scrollHeadInner table {
+            margin: 0 !important;
+            border-spacing: 0 !important;
+            table-layout: auto !important;
+        }
+        
+        .dataTables_scrollBody table {
+            border-spacing: 0 !important;
+            margin: 0 !important;
+            table-layout: auto !important;
+        }
+        
+        /* Ensure columns don't collapse */
+        .dataTables_scroll th,
+        .dataTables_scroll td {
+            min-width: 50px;
+        }
+        
+        /* Sync column widths */
+        .dataTables_scrollBody::-webkit-scrollbar {
+            height: 10px;
+        }
+        
+        .dataTables_scrollBody::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+        
+        .dataTables_scrollBody::-webkit-scrollbar-thumb {
+            background: #888;
+            border-radius: 5px;
+        }
+        
+        .dataTables_scrollBody::-webkit-scrollbar-thumb:hover {
+            background: #555;
+        }
+        
+        /* Additional DataTable fixes */
+        .dataTables_wrapper .dataTables_scroll div.dataTables_scrollHead table,
+        .dataTables_wrapper .dataTables_scroll div.dataTables_scrollBody table {
+            table-layout: fixed !important;
+        }
+        
+        /* Ensure header and body alignment */
+        .dataTables_scrollHeadInner table.dataTable {
+            margin-bottom: 0 !important;
+        }
+        
+        .dataTables_scrollBody table.dataTable {
+            margin-top: 0 !important;
+        }
+        
+        /* Fix column width inheritance */
+        table.dataTable colgroup col {
+            width: auto !important;
+        }
+        
+        /* Loading Overlay */
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0,0,0,0.7);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+        }
+        
+        .loading-content {
+            background-color: white;
+            padding: 30px 50px;
+            border-radius: 10px;
+            text-align: center;
+        }
+        
+        .loading-spinner {
+            width: 50px;
+            height: 50px;
+            border: 5px solid var(--bg-light);
+            border-top: 5px solid var(--secondary-color);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .loading-text {
+            font-size: 16px;
+            color: var(--text-dark);
+            margin: 0;
+        }
+        
+        /* Export Buttons */
+        .export-buttons {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .export-btn {
+            background-color: transparent;
+            color: white;
+            border: 1px solid rgba(255,255,255,0.3);
+            padding: 6px 12px;
+            border-radius: 4px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .export-btn:hover {
+            background-color: rgba(255,255,255,0.2);
+        }
+        
+        /* Responsive */
+        @media (max-width: 768px) {
+            .app-title {
+                font-size: 16px;
+            }
+            
+            .status-bar {
+                flex-wrap: wrap;
+            }
+            
+            .nav-tabs .nav-link {
+                padding: 10px 15px;
+                font-size: 14px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <!-- Top Navigation Bar -->
+        <div class="top-bar">
+            <h1 class="app-title">i2 Data Prep</h1>
+            <div class="action-buttons">
+                <div class="export-buttons" id="exportButtons" style="display: none;">
+                    <button class="export-btn" onclick="copyToClipboard()">
+                        <i class="bi bi-clipboard"></i> Copy to Clipboard
+                    </button>
+                    <button class="export-btn" onclick="exportToExcel()">
+                        <i class="bi bi-file-earmark-excel"></i> Export Excel
+                    </button>
+                </div>
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <div class="file-input-wrapper">
+                        <input type="file" id="fileInput" accept=".xlsx,.xls,.csv">
+                        <label for="fileInput" class="file-input-label">
+                            <i class="bi bi-upload"></i> เลือกไฟล์
+                        </label>
+                    </div>
+                    <span style="color: rgba(255,255,255,0.8); font-size: 14px;">กรุณาเลือกไฟล์ Template04_**.xlsx</span>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Status Bar -->
+        <div class="status-bar" id="statusBar" style="display: none;">
+            <div class="status-left">
+                <div class="status-item">
+                    <span class="status-label">ธนาคาร:</span>
+                    <span class="status-value" id="statusBank">-</span>
+                </div>
+                <div class="status-item">
+                    <span class="status-label">เลขที่บัญชี:</span>
+                    <span class="status-value" id="statusAccount">-</span>
+                </div>
+                <div class="status-item">
+                    <span class="status-label">ชื่อบัญชี:</span>
+                    <span class="status-value" id="statusAccountName">-</span>
+                </div>
+            </div>
+            <div class="status-right">
+                <div class="status-item" id="summaryInfo">
+                    <span id="currentTabSummary">-</span>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Content Area -->
+        <div class="content-area" id="contentArea" style="display: none;">
+            <!-- Tab Navigation -->
+            <ul class="nav nav-tabs" role="tablist">
+                <li class="nav-item">
+                    <button class="nav-link active" data-bs-toggle="tab" data-bs-target="#rawData">RAW DATA</button>
+                </li>
+                <li class="nav-item">
+                    <button class="nav-link" data-bs-toggle="tab" data-bs-target="#inflow">INFLOW</button>
+                </li>
+                <li class="nav-item">
+                    <button class="nav-link" data-bs-toggle="tab" data-bs-target="#outflow">OUTFLOW</button>
+                </li>
+                <li class="nav-item">
+                    <button class="nav-link" data-bs-toggle="tab" data-bs-target="#pvInflow">PV INFLOW</button>
+                </li>
+                <li class="nav-item">
+                    <button class="nav-link" data-bs-toggle="tab" data-bs-target="#pvOutflow">PV OUTFLOW</button>
+                </li>
+                <li class="nav-item">
+                    <button class="nav-link" data-bs-toggle="tab" data-bs-target="#overall">OVERALL</button>
+                </li>
+            </ul>
+            
+            <!-- Tab Content -->
+            <div class="tab-content">
+                <div class="tab-pane fade show active" id="rawData">
+                    <div class="table-container">
+                        <table id="rawTable" class="table table-striped table-hover">
+                            <thead></thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="tab-pane fade" id="inflow">
+                    <div class="table-container">
+                        <table id="inflowTable" class="table table-striped table-hover">
+                            <thead></thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="tab-pane fade" id="outflow">
+                    <div class="table-container">
+                        <table id="outflowTable" class="table table-striped table-hover">
+                            <thead></thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="tab-pane fade" id="pvInflow">
+                    <div class="table-container">
+                        <table id="pvInflowTable" class="table table-striped table-hover">
+                            <thead></thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="tab-pane fade" id="pvOutflow">
+                    <div class="table-container">
+                        <table id="pvOutflowTable" class="table table-striped table-hover">
+                            <thead></thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="tab-pane fade" id="overall">
+                    <div style="height: calc(100vh - 280px); overflow-y: auto; padding: 20px;">
+                        <div class="row mb-4">
+                            <div class="col-md-3">
+                                <div class="card text-center">
+                                    <div class="card-body">
+                                        <h5 class="card-title">Total Records</h5>
+                                        <h2 class="text-primary" id="totalRecords">0</h2>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="card text-center">
+                                    <div class="card-body">
+                                        <h5 class="card-title">Total Inflow</h5>
+                                        <h2 class="text-success" id="totalInflowAmount">0</h2>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="card text-center">
+                                    <div class="card-body">
+                                        <h5 class="card-title">Total Outflow</h5>
+                                        <h2 class="text-danger" id="totalOutflowAmount">0</h2>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="card text-center">
+                                    <div class="card-body">
+                                        <h5 class="card-title">Net Flow</h5>
+                                        <h2 class="text-info" id="netFlow">0</h2>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="card">
+                                    <div class="card-header">
+                                        <h5>Top 10 Inflow Sources</h5>
+                                    </div>
+                                    <div class="card-body">
+                                        <canvas id="inflowChart" height="300"></canvas>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="card">
+                                    <div class="card-header">
+                                        <h5>Top 10 Outflow Destinations</h5>
+                                    </div>
+                                    <div class="card-body">
+                                        <canvas id="outflowChart" height="300"></canvas>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Loading Overlay -->
+    <div class="loading-overlay" id="loadingOverlay">
+        <div class="loading-content">
+            <div class="loading-spinner"></div>
+            <p class="loading-text">กำลังประมวลผลข้อมูล...</p>
+        </div>
+    </div>
+    
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/jquery@3.7.0/dist/jquery.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap5.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <script>
+        // Global variables
+        let rawData = [];
+        let currentTab = 'raw-data';
+        let dataTableInstances = {
+            'raw': null,
+            'inflow': null,
+            'outflow': null,
+            'pvInflow': null,
+            'pvOutflow': null
+        };
+        let inflowChart = null;
+        let outflowChart = null;
+        
+        // Bank code mapping
+        const bankCodeMap = {
+            '002': 'BBL',
+            '004': 'KBNK',
+            '006': 'KTB',
+            '011': 'TTB',
+            '014': 'SCB',
+            '017': 'CITI',
+            '020': 'SCBT',
+            '022': 'CMBT',
+            '024': 'UOBT',
+            '025': 'BAY',
+            '030': 'GSB',
+            '033': 'GHB',
+            '034': 'BAAC',
+            '067': 'TSCO',
+            '069': 'KKP',
+            '070': 'ICBC',
+            '073': 'LHB'
+        };
+        
+        // Required fields
+        const requiredFields = [
+            'bankcode', 'accountname', 'accountno', 'searchstatus', 'checkdate',
+            'txno', 'txdate', 'txtime', 'txtype', 'fromaccountno',
+            'fromaccountname', 'frombankcode', 'toaccountno', 'toaccountname',
+            'tobankcode', 'txchannel', 'deposit', 'withdrawal', 'balance',
+            'chequeno', 'branchcode', 'empcode', 'machinecode', 'machineowner', 'ipaddress'
+        ];
+        
+        // DataTables Thai language
+        const thaiLanguage = {
+            "decimal": "",
+            "emptyTable": "ไม่มีข้อมูลในตาราง",
+            "info": "แสดง _START_ ถึง _END_ จาก _TOTAL_ รายการ",
+            "infoEmpty": "แสดง 0 ถึง 0 จาก 0 รายการ",
+            "infoFiltered": "(กรองจากทั้งหมด _MAX_ รายการ)",
+            "lengthMenu": "แสดง _MENU_ รายการ",
+            "loadingRecords": "กำลังโหลด...",
+            "processing": "กำลังประมวลผล...",
+            "search": "ค้นหา:",
+            "zeroRecords": "ไม่พบข้อมูลที่ตรงกัน",
+            "paginate": {
+                "first": "หน้าแรก",
+                "last": "หน้าสุดท้าย",
+                "next": "ถัดไป",
+                "previous": "ก่อนหน้า"
+            }
+        };
+        
+        // Initialize file input
+        document.getElementById('fileInput').addEventListener('change', handleFileSelect);
+        
+        // Handle file selection
+        function handleFileSelect(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+            
+            showLoading();
+            
+            const reader = new FileReader();
+            const fileType = file.name.split('.').pop().toLowerCase();
+            
+            reader.onload = function(e) {
+                try {
+                    if (fileType === 'csv') {
+                        parseCSV(e.target.result);
+                    } else {
+                        parseExcel(e.target.result);
+                    }
+                } catch (error) {
+                    console.error('Error processing file:', error);
+                    alert('เกิดข้อผิดพลาดในการประมวลผลไฟล์');
+                    hideLoading();
+                }
+            };
+            
+            if (fileType === 'csv') {
+                reader.readAsText(file);
+            } else {
+                reader.readAsArrayBuffer(file);
+            }
+        }
+        
+        // Parse CSV file
+        function parseCSV(data) {
+            Papa.parse(data, {
+                header: true,
+                dynamicTyping: true,
+                skipEmptyLines: true,
+                complete: function(results) {
+                    processData(results.data);
+                }
+            });
+        }
+        
+        // Parse Excel file
+        function parseExcel(data) {
+            const workbook = XLSX.read(data, {
+                type: 'array',
+                cellDates: true,
+                cellNF: true,
+                cellStyles: true,
+                dateNF: 'yyyy-mm-dd',
+                raw: false,
+                defval: ''
+            });
+            const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
+            const jsonData = XLSX.utils.sheet_to_json(firstSheet, {
+                raw: false,
+                defval: '',
+                header: 1,
+                blankrows: false
+            });
+            
+            // Convert array data to object format using first row as headers
+            if (jsonData.length > 0) {
+                const headers = jsonData[0].map(h => String(h).toLowerCase().trim());
+                const dataRows = jsonData.slice(1).map(row => {
+                    const obj = {};
+                    headers.forEach((header, index) => {
+                        obj[header] = row[index] || '';
+                    });
+                    return obj;
+                });
+                
+                console.log(`Total records read: ${dataRows.length}`);
+                processData(dataRows);
+            }
+        }
+        
+        // Process data
+        function processData(data) {
+            // Filter and clean data
+            rawData = data.map(row => {
+                const cleanRow = {};
+                requiredFields.forEach(field => {
+                    let value = row[field] || '';
+                    
+                    // Clean and format values
+                    if (field === 'bankcode' || field === 'frombankcode' || field === 'tobankcode') {
+                        cleanRow[field] = bankCodeMap[value] || value;
+                    } else if (field === 'deposit' || field === 'withdrawal' || field === 'balance') {
+                        cleanRow[field] = formatNumber(value);
+                    } else if (field === 'accountno' || field === 'fromaccountno' || field === 'toaccountno') {
+                        cleanRow[field] = String(value).padStart(10, '0');
+                    } else {
+                        cleanRow[field] = value;
+                    }
+                });
+                return cleanRow;
+            });
+            
+            // Update status bar
+            updateStatusBar();
+            
+            // Show content area
+            document.getElementById('statusBar').style.display = 'flex';
+            document.getElementById('contentArea').style.display = 'flex';
+            document.getElementById('exportButtons').style.display = 'flex';
+            
+            // Initialize all tables
+            initializeTables();
+            
+            // Initialize dashboard
+            initializeDashboard();
+            
+            // Update summary for current tab
+            updateTabSummary();
+            
+            hideLoading();
+        }
+        
+        // Format number with comma
+        function formatNumber(value) {
+            const num = parseFloat(String(value).replace(/,/g, '')) || 0;
+            return num.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+        }
+        
+        // Update status bar
+        function updateStatusBar() {
+            const accounts = {};
+            rawData.forEach(row => {
+                const key = `${row.bankcode}|${row.accountno}|${row.accountname}`;
+                accounts[key] = (accounts[key] || 0) + 1;
+            });
+            
+            const mostFrequent = Object.entries(accounts).sort((a, b) => b[1] - a[1])[0];
+            if (mostFrequent) {
+                const [bank, account, name] = mostFrequent[0].split('|');
+                document.getElementById('statusBank').textContent = bank;
+                document.getElementById('statusAccount').textContent = account;
+                document.getElementById('statusAccountName').textContent = name;
+            }
+        }
+        
+        // Initialize all tables
+        function initializeTables() {
+            // Destroy existing tables if any
+            Object.values(dataTableInstances).forEach(table => {
+                if (table && $.fn.DataTable.isDataTable(table)) {
+                    table.destroy();
+                }
+            });
+            
+            // RAW DATA
+            const rawColumns = [
+                {data: 'txdate', title: 'txdate'},
+                {data: 'txtime', title: 'txtime'},
+                {data: 'txtype', title: 'txtype'},
+                {data: 'frombankcode', title: 'frombankcode'},
+                {data: 'fromaccountno', title: 'fromaccountno'},
+                {data: 'fromaccountname', title: 'fromaccountname'},
+                {data: 'tobankcode', title: 'tobankcode'},
+                {data: 'toaccountno', title: 'toaccountno'},
+                {data: 'toaccountname', title: 'toaccountname'},
+                {data: 'txchannel', title: 'txchannel'},
+                {
+                    data: 'deposit', 
+                    title: 'deposit',
+                    render: function(data) {
+                        return '<span class="deposit-value">' + data + '</span>';
+                    }
+                },
+                {
+                    data: 'withdrawal', 
+                    title: 'withdrawal',
+                    render: function(data) {
+                        return '<span class="withdrawal-value">' + data + '</span>';
+                    }
+                },
+                {data: 'balance', title: 'balance'},
+                {data: 'chequeno', title: 'chequeno'},
+                {data: 'branchcode', title: 'branchcode'},
+                {data: 'empcode', title: 'empcode'},
+                {data: 'machinecode', title: 'machinecode'},
+                {data: 'machineowner', title: 'machineowner'},
+                {data: 'ipaddress', title: 'ipaddress'}
+            ];
+            
+            dataTableInstances.raw = $('#rawTable').DataTable({
+                data: rawData,
+                columns: rawColumns,
+                order: [[0, 'desc'], [1, 'desc']],
+                pageLength: -1,
+                dom: 'rt',
+                scrollY: 'calc(100vh - 280px)',
+                scrollX: true,
+                scrollCollapse: false,
+                language: thaiLanguage,
+                autoWidth: false,
+                columnDefs: [
+                    { targets: '_all', className: 'text-nowrap', width: '120px' }
+                ],
+                initComplete: function() {
+                    // Fix column alignment after initialization
+                    var api = this.api();
+                    api.columns.adjust();
+                    
+                    // Setup scroll sync
+                    var scrollHead = $(api.table().container()).find('.dataTables_scrollHead');
+                    var scrollBody = $(api.table().container()).find('.dataTables_scrollBody');
+                    
+                    scrollBody.on('scroll', function() {
+                        scrollHead.scrollLeft($(this).scrollLeft());
+                    });
+                    
+                    // Force initial column width sync
+                    setTimeout(function() {
+                        api.columns.adjust();
+                    }, 10);
+                }
+            });
+            
+            // INFLOW
+            const inflowData = rawData.filter(row => parseFloat(row.deposit.replace(/,/g, '')) > 0);
+            const inflowColumns = rawColumns.filter(col => col.data !== 'withdrawal' && col.data !== 'balance');
+            
+            dataTableInstances.inflow = $('#inflowTable').DataTable({
+                data: inflowData,
+                columns: inflowColumns,
+                order: [[0, 'desc'], [1, 'desc']],
+                pageLength: -1,
+                dom: 'rt',
+                scrollY: 'calc(100vh - 280px)',
+                scrollX: true,
+                scrollCollapse: false,
+                language: thaiLanguage,
+                autoWidth: false,
+                columnDefs: [
+                    { targets: '_all', className: 'text-nowrap', width: '120px' }
+                ],
+                initComplete: function() {
+                    var api = this.api();
+                    var scrollHead = $(api.table().container()).find('.dataTables_scrollHead');
+                    var scrollBody = $(api.table().container()).find('.dataTables_scrollBody');
+                    
+                    // Setup scroll sync
+                    scrollBody.on('scroll', function() {
+                        scrollHead.scrollLeft($(this).scrollLeft());
+                    });
+                    
+                    // Fix alignment after a short delay
+                    setTimeout(function() {
+                        fixColumnAlignment(api);
+                    }, 50);
+                }
+            });
+            
+            // OUTFLOW
+            const outflowData = rawData.filter(row => parseFloat(row.withdrawal.replace(/,/g, '')) > 0);
+            const outflowColumns = rawColumns.filter(col => col.data !== 'deposit' && col.data !== 'balance');
+            
+            dataTableInstances.outflow = $('#outflowTable').DataTable({
+                data: outflowData,
+                columns: outflowColumns,
+                order: [[0, 'desc'], [1, 'desc']],
+                pageLength: -1,
+                dom: 'rt',
+                scrollY: 'calc(100vh - 280px)',
+                scrollX: true,
+                scrollCollapse: false,
+                language: thaiLanguage,
+                autoWidth: false,
+                columnDefs: [
+                    { targets: '_all', className: 'text-nowrap', width: '120px' }
+                ],
+                initComplete: function() {
+                    var api = this.api();
+                    api.columns.adjust();
+                    var scrollHead = $(api.table().container()).find('.dataTables_scrollHead');
+                    var scrollBody = $(api.table().container()).find('.dataTables_scrollBody');
+                    scrollBody.on('scroll', function() {
+                        scrollHead.scrollLeft($(this).scrollLeft());
+                    });
+                    setTimeout(function() {
+                        api.columns.adjust();
+                    }, 10);
+                }
+            });
+            
+            // PV INFLOW
+            const pvInflowData = createPivotInflow(inflowData);
+            dataTableInstances.pvInflow = $('#pvInflowTable').DataTable({
+                data: pvInflowData,
+                columns: [
+                    {data: 'frombankcode', title: 'frombankcode'},
+                    {data: 'fromaccountno', title: 'fromaccountno'},
+                    {data: 'fromaccountname', title: 'fromaccountname'},
+                    {data: 'transaction_count', title: 'transaction_count'},
+                    {
+                        data: 'total_amount', 
+                        title: 'total_amount',
+                        render: function(data) {
+                            return '<span class="deposit-value">' + data + '</span>';
+                        }
+                    },
+                    {data: 'first_date', title: 'first_date'},
+                    {data: 'last_date', title: 'last_date'}
+                ],
+                order: [[4, 'desc']],
+                pageLength: -1,
+                dom: 'rt',
+                scrollY: 'calc(100vh - 280px)',
+                scrollX: true,
+                scrollCollapse: false,
+                language: thaiLanguage,
+                autoWidth: false,
+                columnDefs: [
+                    { targets: '_all', className: 'text-nowrap', width: '120px' }
+                ],
+                initComplete: function() {
+                    var api = this.api();
+                    api.columns.adjust();
+                    var scrollHead = $(api.table().container()).find('.dataTables_scrollHead');
+                    var scrollBody = $(api.table().container()).find('.dataTables_scrollBody');
+                    scrollBody.on('scroll', function() {
+                        scrollHead.scrollLeft($(this).scrollLeft());
+                    });
+                    setTimeout(function() {
+                        api.columns.adjust();
+                    }, 10);
+                }
+            });
+            
+            // PV OUTFLOW
+            const pvOutflowData = createPivotOutflow(outflowData);
+            dataTableInstances.pvOutflow = $('#pvOutflowTable').DataTable({
+                data: pvOutflowData,
+                columns: [
+                    {data: 'tobankcode', title: 'tobankcode'},
+                    {data: 'toaccountno', title: 'toaccountno'},
+                    {data: 'toaccountname', title: 'toaccountname'},
+                    {data: 'transaction_count', title: 'transaction_count'},
+                    {
+                        data: 'total_amount', 
+                        title: 'total_amount',
+                        render: function(data) {
+                            return '<span class="withdrawal-value">' + data + '</span>';
+                        }
+                    },
+                    {data: 'first_date', title: 'first_date'},
+                    {data: 'last_date', title: 'last_date'}
+                ],
+                order: [[4, 'desc']],
+                pageLength: -1,
+                dom: 'rt',
+                scrollY: 'calc(100vh - 280px)',
+                scrollX: true,
+                scrollCollapse: false,
+                language: thaiLanguage,
+                autoWidth: false,
+                columnDefs: [
+                    { targets: '_all', className: 'text-nowrap', width: '120px' }
+                ],
+                initComplete: function() {
+                    var api = this.api();
+                    api.columns.adjust();
+                    var scrollHead = $(api.table().container()).find('.dataTables_scrollHead');
+                    var scrollBody = $(api.table().container()).find('.dataTables_scrollBody');
+                    scrollBody.on('scroll', function() {
+                        scrollHead.scrollLeft($(this).scrollLeft());
+                    });
+                    setTimeout(function() {
+                        api.columns.adjust();
+                    }, 10);
+                }
+            });
+        }
+        
+        // Create pivot inflow data
+        function createPivotInflow(data) {
+            const grouped = {};
+            
+            data.forEach(row => {
+                const key = row.fromaccountno;
+                if (!grouped[key]) {
+                    grouped[key] = {
+                        frombankcode: row.frombankcode,
+                        fromaccountno: row.fromaccountno,
+                        fromaccountname: row.fromaccountname,
+                        transaction_count: 0,
+                        total_amount: 0,
+                        dates: []
+                    };
+                }
+                
+                grouped[key].transaction_count++;
+                grouped[key].total_amount += parseFloat(row.deposit.replace(/,/g, ''));
+                grouped[key].dates.push(row.txdate);
+            });
+            
+            return Object.values(grouped).map(item => {
+                item.dates.sort();
+                return {
+                    ...item,
+                    total_amount: formatNumber(item.total_amount),
+                    first_date: item.dates[0],
+                    last_date: item.dates[item.dates.length - 1]
+                };
+            });
+        }
+        
+        // Create pivot outflow data
+        function createPivotOutflow(data) {
+            const grouped = {};
+            
+            data.forEach(row => {
+                const key = row.toaccountno;
+                if (!grouped[key]) {
+                    grouped[key] = {
+                        tobankcode: row.tobankcode,
+                        toaccountno: row.toaccountno,
+                        toaccountname: row.toaccountname,
+                        transaction_count: 0,
+                        total_amount: 0,
+                        dates: []
+                    };
+                }
+                
+                grouped[key].transaction_count++;
+                grouped[key].total_amount += parseFloat(row.withdrawal.replace(/,/g, ''));
+                grouped[key].dates.push(row.txdate);
+            });
+            
+            return Object.values(grouped).map(item => {
+                item.dates.sort();
+                return {
+                    ...item,
+                    total_amount: formatNumber(item.total_amount),
+                    first_date: item.dates[0],
+                    last_date: item.dates[item.dates.length - 1]
+                };
+            });
+        }
+        
+        // Track active tab
+        currentTab = 'raw-data'; // Set default tab
+        document.addEventListener('shown.bs.tab', function(e) {
+            const tabId = e.target.getAttribute('data-bs-target').substring(1);
+            // Convert tab ID to currentTab format
+            switch(tabId) {
+                case 'rawData':
+                    currentTab = 'raw-data';
+                    break;
+                case 'inflow':
+                    currentTab = 'inflow';
+                    break;
+                case 'outflow':
+                    currentTab = 'outflow';
+                    break;
+                case 'pvInflow':
+                    currentTab = 'pv-inflow';
+                    break;
+                case 'pvOutflow':
+                    currentTab = 'pv-outflow';
+                    break;
+                case 'overall':
+                    currentTab = 'overall';
+                    break;
+            }
+            // Update summary when tab changes
+            updateTabSummary();
+        });
+        
+        // Copy to clipboard (CSV format)
+        function copyToClipboard() {
+            if (currentTab === 'overall') {
+                alert('ไม่สามารถคัดลอกข้อมูลจาก Dashboard ได้');
+                return;
+            }
+            
+            // Map current tab to table instance key
+            const tabMap = {
+                'raw-data': 'raw',
+                'inflow': 'inflow', 
+                'outflow': 'outflow',
+                'pv-inflow': 'pvInflow',
+                'pv-outflow': 'pvOutflow'
+            };
+            
+            const tableKey = tabMap[currentTab] || 'raw';
+            const table = dataTableInstances[tableKey];
+            
+            if (!table) {
+                alert('ไม่พบข้อมูลในตาราง');
+                return;
+            }
+            
+            let csv = '\ufeff'; // BOM for UTF-8
+            
+            // Get headers
+            const headers = [];
+            $(table.table().header()).find('th').each(function() {
+                headers.push($(this).text());
+            });
+            csv += headers.map(h => `"${h}"`).join(',') + '\n';
+            
+            // Get data
+            table.rows().every(function() {
+                const rowData = this.data();
+                const row = [];
+                table.columns().every(function() {
+                    const colData = this.dataSrc();
+                    let value = rowData[colData];
+                    if (value === null || value === undefined) {
+                        value = '';
+                    }
+                    // Remove HTML tags
+                    value = value.toString().replace(/<[^>]*>/g, '');
+                    row.push(`"${value}"`);
+                });
+                csv += row.join(',') + '\n';
+            });
+            
+            // Copy to clipboard
+            const textArea = document.createElement('textarea');
+            textArea.value = csv;
+            textArea.style.position = 'fixed';
+            textArea.style.left = '-9999px';
+            document.body.appendChild(textArea);
+            textArea.select();
+            
+            try {
+                document.execCommand('copy');
+                alert('คัดลอกข้อมูลเรียบร้อยแล้ว (CSV Format)');
+            } catch (err) {
+                console.error('Error copying to clipboard:', err);
+                alert('เกิดข้อผิดพลาดในการคัดลอกข้อมูล');
+            }
+            
+            document.body.removeChild(textArea);
+        }
+        
+        // Export to Excel with multiple sheets
+        function exportToExcel() {
+            const wb = XLSX.utils.book_new();
+            
+            // Helper function to get table data
+            function getTableData(tableKey, sheetName) {
+                const table = dataTableInstances[tableKey];
+                if (!table) return;
+                
+                const data = [];
+                
+                // Get headers
+                const headers = [];
+                $(table.table().header()).find('th').each(function() {
+                    headers.push($(this).text());
+                });
+                data.push(headers);
+                
+                // Get data rows
+                table.rows().every(function() {
+                    const rowData = this.data();
+                    const row = [];
+                    table.columns().every(function() {
+                        const colData = this.dataSrc();
+                        let value = rowData[colData];
+                        if (value === null || value === undefined) {
+                            value = '';
+                        }
+                        // Remove HTML tags
+                        value = value.toString().replace(/<[^>]*>/g, '');
+                        row.push(value);
+                    });
+                    data.push(row);
+                });
+                
+                const ws = XLSX.utils.aoa_to_sheet(data);
+                XLSX.utils.book_append_sheet(wb, ws, sheetName);
+            }
+            
+            // Add sheets for each table
+            getTableData('raw', 'RAW DATA');
+            getTableData('inflow', 'INFLOW');
+            getTableData('outflow', 'OUTFLOW');
+            getTableData('pvInflow', 'PV INFLOW');
+            getTableData('pvOutflow', 'PV OUTFLOW');
+            
+            // Export
+            const fileName = `i2_data_prep_${new Date().toISOString().slice(0,10)}.xlsx`;
+            XLSX.writeFile(wb, fileName);
+        }
+        
+        // Show/hide loading
+        function showLoading() {
+            document.getElementById('loadingOverlay').style.display = 'flex';
+        }
+        
+        function hideLoading() {
+            document.getElementById('loadingOverlay').style.display = 'none';
+        }
+        
+        // Update tab summary
+        function updateTabSummary() {
+            if (!rawData || rawData.length === 0) return;
+            
+            const summaryElement = document.getElementById('currentTabSummary');
+            let summaryText = '';
+            
+            switch(currentTab) {
+                case 'raw-data':
+                    const totalRecords = rawData.length;
+                    summaryText = `Records: ${totalRecords.toLocaleString()}`;
+                    break;
+                case 'inflow':
+                    const inflowData = rawData.filter(row => parseFloat(row.deposit.replace(/,/g, '')) > 0);
+                    const totalInflow = inflowData.reduce((sum, row) => sum + parseFloat(row.deposit.replace(/,/g, '')), 0);
+                    summaryText = `Inflow: ${totalInflow.toLocaleString('en-US', {minimumFractionDigits: 2})} (${inflowData.length} records)`;
+                    break;
+                case 'outflow':
+                    const outflowData = rawData.filter(row => parseFloat(row.withdrawal.replace(/,/g, '')) > 0);
+                    const totalOutflow = outflowData.reduce((sum, row) => sum + parseFloat(row.withdrawal.replace(/,/g, '')), 0);
+                    summaryText = `Outflow: ${totalOutflow.toLocaleString('en-US', {minimumFractionDigits: 2})} (${outflowData.length} records)`;
+                    break;
+                case 'pv-inflow':
+                    const pvInflowData = createPivotInflow(rawData.filter(row => parseFloat(row.deposit.replace(/,/g, '')) > 0));
+                    const pvInflowTotal = pvInflowData.reduce((sum, row) => sum + parseFloat(row.total_amount.replace(/,/g, '')), 0);
+                    summaryText = `PV Inflow: ${pvInflowTotal.toLocaleString('en-US', {minimumFractionDigits: 2})} (${pvInflowData.length} sources)`;
+                    break;
+                case 'pv-outflow':
+                    const pvOutflowData = createPivotOutflow(rawData.filter(row => parseFloat(row.withdrawal.replace(/,/g, '')) > 0));
+                    const pvOutflowTotal = pvOutflowData.reduce((sum, row) => sum + parseFloat(row.total_amount.replace(/,/g, '')), 0);
+                    summaryText = `PV Outflow: ${pvOutflowTotal.toLocaleString('en-US', {minimumFractionDigits: 2})} (${pvOutflowData.length} destinations)`;
+                    break;
+                case 'overall':
+                    summaryText = 'Dashboard Overview';
+                    break;
+                default:
+                    summaryText = '-';
+            }
+            
+            summaryElement.textContent = summaryText;
+        }
+        
+        // Initialize dashboard
+        function initializeDashboard() {
+            if (!rawData || rawData.length === 0) return;
+            
+            // Calculate totals
+            const totalRecords = rawData.length;
+            const inflowData = rawData.filter(row => parseFloat(row.deposit.replace(/,/g, '')) > 0);
+            const outflowData = rawData.filter(row => parseFloat(row.withdrawal.replace(/,/g, '')) > 0);
+            
+            const totalInflowAmount = inflowData.reduce((sum, row) => sum + parseFloat(row.deposit.replace(/,/g, '')), 0);
+            const totalOutflowAmount = outflowData.reduce((sum, row) => sum + parseFloat(row.withdrawal.replace(/,/g, '')), 0);
+            const netFlow = totalInflowAmount - totalOutflowAmount;
+            
+            // Update dashboard cards
+            document.getElementById('totalRecords').textContent = totalRecords.toLocaleString();
+            document.getElementById('totalInflowAmount').textContent = totalInflowAmount.toLocaleString('en-US', {minimumFractionDigits: 2});
+            document.getElementById('totalOutflowAmount').textContent = totalOutflowAmount.toLocaleString('en-US', {minimumFractionDigits: 2});
+            document.getElementById('netFlow').textContent = netFlow.toLocaleString('en-US', {minimumFractionDigits: 2});
+            
+            // Create charts
+            createInflowChart(inflowData);
+            createOutflowChart(outflowData);
+        }
+        
+        // Create inflow chart
+        function createInflowChart(data) {
+            // Group by source account and sum amounts
+            const grouped = {};
+            data.forEach(row => {
+                const key = `${row.frombankcode}-${row.fromaccountno}`;
+                const name = row.fromaccountname || key;
+                if (!grouped[key]) {
+                    grouped[key] = { name: name, amount: 0 };
+                }
+                grouped[key].amount += parseFloat(row.deposit.replace(/,/g, ''));
+            });
+            
+            // Sort and get top 10
+            const sortedData = Object.values(grouped)
+                .sort((a, b) => b.amount - a.amount)
+                .slice(0, 10);
+            
+            const ctx = document.getElementById('inflowChart').getContext('2d');
+            
+            if (inflowChart) {
+                inflowChart.destroy();
+            }
+            
+            inflowChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: sortedData.map(item => item.name.length > 20 ? item.name.substring(0, 20) + '...' : item.name),
+                    datasets: [{
+                        label: 'Inflow Amount',
+                        data: sortedData.map(item => item.amount),
+                        backgroundColor: 'rgba(39, 174, 96, 0.8)',
+                        borderColor: 'rgba(39, 174, 96, 1)',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                callback: function(value) {
+                                    return value.toLocaleString();
+                                }
+                            }
+                        },
+                        x: {
+                            ticks: {
+                                maxRotation: 45
+                            }
+                        }
+                    },
+                    plugins: {
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return 'Amount: ' + context.parsed.y.toLocaleString('en-US', {minimumFractionDigits: 2});
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+        
+        // Create outflow chart
+        function createOutflowChart(data) {
+            // Group by destination account and sum amounts
+            const grouped = {};
+            data.forEach(row => {
+                const key = `${row.tobankcode}-${row.toaccountno}`;
+                const name = row.toaccountname || key;
+                if (!grouped[key]) {
+                    grouped[key] = { name: name, amount: 0 };
+                }
+                grouped[key].amount += parseFloat(row.withdrawal.replace(/,/g, ''));
+            });
+            
+            // Sort and get top 10
+            const sortedData = Object.values(grouped)
+                .sort((a, b) => b.amount - a.amount)
+                .slice(0, 10);
+            
+            const ctx = document.getElementById('outflowChart').getContext('2d');
+            
+            if (outflowChart) {
+                outflowChart.destroy();
+            }
+            
+            outflowChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: sortedData.map(item => item.name.length > 20 ? item.name.substring(0, 20) + '...' : item.name),
+                    datasets: [{
+                        label: 'Outflow Amount',
+                        data: sortedData.map(item => item.amount),
+                        backgroundColor: 'rgba(231, 76, 60, 0.8)',
+                        borderColor: 'rgba(231, 76, 60, 1)',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                callback: function(value) {
+                                    return value.toLocaleString();
+                                }
+                            }
+                        },
+                        x: {
+                            ticks: {
+                                maxRotation: 45
+                            }
+                        }
+                    },
+                    plugins: {
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return 'Amount: ' + context.parsed.y.toLocaleString('en-US', {minimumFractionDigits: 2});
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+        
+        // Make functions available globally for button onclick
+        window.copyToClipboard = copyToClipboard;
+        window.exportToExcel = exportToExcel;
+    </script>
+</body>
+</html>
