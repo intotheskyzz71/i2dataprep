@@ -320,7 +320,7 @@
         /* Ensure columns don't collapse */
         .dataTables_scroll th,
         .dataTables_scroll td {
-            min-width: 50px;
+            min-width: 100px;
         }
         
         /* Sync column widths */
@@ -356,9 +356,43 @@
             margin-top: 0 !important;
         }
         
-        /* Fix column width inheritance */
-        table.dataTable colgroup col {
+        /* Dynamic column width based on content */
+        table.dataTable {
+            table-layout: fixed !important;
             width: auto !important;
+        }
+        
+        table.dataTable th,
+        table.dataTable td {
+            white-space: nowrap !important;
+            overflow: hidden !important;
+            text-overflow: ellipsis !important;
+            box-sizing: border-box !important;
+            padding: 8px 10px !important;
+        }
+        
+        /* Override DataTables layout */
+        .dataTables_scrollHeadInner,
+        .dataTables_scrollBodyInner {
+            overflow: visible !important;
+        }
+        
+        .dataTables_scrollHeadInner table,
+        .dataTables_scrollBodyInner table {
+            table-layout: fixed !important;
+            border-collapse: separate !important;
+            border-spacing: 0 !important;
+        }
+        
+        /* Force header and body column alignment */
+        .dataTables_scrollHead {
+            overflow: hidden !important;
+            border-bottom: 1px solid #dee2e6;
+        }
+        
+        .dataTables_scrollBody {
+            overflow: auto !important;
+            border-top: none !important;
         }
         
         /* Loading Overlay */
@@ -424,6 +458,117 @@
             background-color: rgba(255,255,255,0.2);
         }
         
+        /* Help Button */
+        .help-btn {
+            background-color: rgba(255,255,255,0.1);
+            color: white;
+            border: 1px solid rgba(255,255,255,0.3);
+            padding: 8px;
+            border-radius: 50%;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 36px;
+            height: 36px;
+        }
+        
+        .help-btn:hover {
+            background-color: rgba(255,255,255,0.2);
+            transform: scale(1.1);
+        }
+        
+        /* Contact Modal Styles */
+        .contact-info {
+            padding: 10px 0;
+        }
+        
+        .developer-card {
+            display: flex;
+            align-items: center;
+            margin-bottom: 20px;
+            padding: 15px;
+            background-color: var(--bg-light);
+            border-radius: 8px;
+            border-left: 4px solid var(--secondary-color);
+        }
+        
+        .developer-avatar {
+            font-size: 48px;
+            color: var(--secondary-color);
+            margin-right: 15px;
+        }
+        
+        .developer-name {
+            margin: 0;
+            color: var(--text-dark);
+            font-weight: 600;
+            font-size: 16px;
+        }
+        
+        .developer-position {
+            margin: 5px 0 0 0;
+            color: #6c757d;
+            font-size: 14px;
+        }
+        
+        .contact-methods {
+            margin-bottom: 20px;
+        }
+        
+        .contact-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+            padding: 10px;
+            background-color: #fff;
+            border: 1px solid #dee2e6;
+            border-radius: 6px;
+        }
+        
+        .contact-item i {
+            font-size: 18px;
+            margin-right: 10px;
+            width: 20px;
+            text-align: center;
+        }
+        
+        .contact-item i.bi-telephone-fill {
+            color: var(--success-color);
+        }
+        
+        .contact-item i.bi-chat-dots-fill {
+            color: #00B900;
+        }
+        
+        .contact-label {
+            font-weight: 500;
+            margin-right: 10px;
+            min-width: 80px;
+            color: var(--text-dark);
+        }
+        
+        .contact-value {
+            font-weight: 600;
+            color: var(--secondary-color);
+            text-decoration: none;
+        }
+        
+        .contact-value:hover {
+            color: var(--primary-color);
+        }
+        
+        .help-note {
+            margin-top: 15px;
+        }
+        
+        .help-note .alert {
+            margin: 0;
+            font-size: 14px;
+        }
+        
         /* Responsive */
         @media (max-width: 768px) {
             .app-title {
@@ -463,6 +608,9 @@
                         </label>
                     </div>
                     <span style="color: rgba(255,255,255,0.8); font-size: 14px;">กรุณาเลือกไฟล์ Template04_**.xlsx</span>
+                    <button class="help-btn" onclick="showContactModal()" title="ติดต่อผู้พัฒนา">
+                        <i class="bi bi-question-circle"></i>
+                    </button>
                 </div>
             </div>
         </div>
@@ -558,58 +706,206 @@
                 </div>
                 <div class="tab-pane fade" id="overall">
                     <div style="height: calc(100vh - 280px); overflow-y: auto; padding: 20px;">
+                        <!-- Summary Cards -->
                         <div class="row mb-4">
-                            <div class="col-md-3">
+                            <div class="col-md-2">
                                 <div class="card text-center">
                                     <div class="card-body">
-                                        <h5 class="card-title">Total Records</h5>
-                                        <h2 class="text-primary" id="totalRecords">0</h2>
+                                        <h6 class="card-title">Total Records</h6>
+                                        <h3 class="text-primary" id="totalRecords">0</h3>
                                     </div>
                                 </div>
                             </div>
-                            <div class="col-md-3">
+                            <div class="col-md-2">
                                 <div class="card text-center">
                                     <div class="card-body">
-                                        <h5 class="card-title">Total Inflow</h5>
-                                        <h2 class="text-success" id="totalInflowAmount">0</h2>
+                                        <h6 class="card-title">Total Inflow</h6>
+                                        <h3 class="text-success" id="totalInflowAmount">0</h3>
                                     </div>
                                 </div>
                             </div>
-                            <div class="col-md-3">
+                            <div class="col-md-2">
                                 <div class="card text-center">
                                     <div class="card-body">
-                                        <h5 class="card-title">Total Outflow</h5>
-                                        <h2 class="text-danger" id="totalOutflowAmount">0</h2>
+                                        <h6 class="card-title">Total Outflow</h6>
+                                        <h3 class="text-danger" id="totalOutflowAmount">0</h3>
                                     </div>
                                 </div>
                             </div>
-                            <div class="col-md-3">
+                            <div class="col-md-2">
                                 <div class="card text-center">
                                     <div class="card-body">
-                                        <h5 class="card-title">Net Flow</h5>
-                                        <h2 class="text-info" id="netFlow">0</h2>
+                                        <h6 class="card-title">Net Flow</h6>
+                                        <h3 class="text-info" id="netFlow">0</h3>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-2">
+                                <div class="card text-center">
+                                    <div class="card-body">
+                                        <h6 class="card-title">Inflow Sources</h6>
+                                        <h3 class="text-warning" id="inflowSources">0</h3>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-2">
+                                <div class="card text-center">
+                                    <div class="card-body">
+                                        <h6 class="card-title">Outflow Destinations</h6>
+                                        <h3 class="text-secondary" id="outflowDestinations">0</h3>
                                     </div>
                                 </div>
                             </div>
                         </div>
+                        
+                        <!-- Detailed Statistics -->
+                        <div class="row mb-4">
+                            <div class="col-md-3">
+                                <div class="card">
+                                    <div class="card-header">
+                                        <h6>Transaction Distribution</h6>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="mb-2">
+                                            <small class="text-muted">Inflow Transactions:</small>
+                                            <div class="d-flex justify-content-between">
+                                                <span id="inflowCount">0</span>
+                                                <span id="inflowPercentage" class="text-success">0%</span>
+                                            </div>
+                                        </div>
+                                        <div class="mb-2">
+                                            <small class="text-muted">Outflow Transactions:</small>
+                                            <div class="d-flex justify-content-between">
+                                                <span id="outflowCount">0</span>
+                                                <span id="outflowPercentage" class="text-danger">0%</span>
+                                            </div>
+                                        </div>
+                                        <hr>
+                                        <div>
+                                            <small class="text-muted">Average Transaction:</small>
+                                            <div class="d-flex justify-content-between">
+                                                <span class="text-success">In: <span id="avgInflow">0</span></span>
+                                                <span class="text-danger">Out: <span id="avgOutflow">0</span></span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="card">
+                                    <div class="card-header">
+                                        <h6>Bank Analysis</h6>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="mb-2">
+                                            <small class="text-muted">Most Active Bank:</small>
+                                            <div><strong id="mostActiveBank">-</strong></div>
+                                        </div>
+                                        <div class="mb-2">
+                                            <small class="text-muted">Total Banks Involved:</small>
+                                            <div><strong id="totalBanks">0</strong></div>
+                                        </div>
+                                        <hr>
+                                        <div>
+                                            <small class="text-muted">Transaction Channels:</small>
+                                            <div id="channelList" style="max-height: 80px; overflow-y: auto;">
+                                                <small class="text-muted">Loading...</small>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="card">
+                                    <div class="card-header">
+                                        <h6>Time Analysis</h6>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="mb-2">
+                                            <small class="text-muted">Date Range:</small>
+                                            <div><small id="dateRange">-</small></div>
+                                        </div>
+                                        <div class="mb-2">
+                                            <small class="text-muted">Peak Day:</small>
+                                            <div><strong id="peakDay">-</strong></div>
+                                        </div>
+                                        <hr>
+                                        <div>
+                                            <small class="text-muted">Daily Average:</small>
+                                            <div class="text-primary"><strong id="dailyAverage">0</strong> transactions</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="card">
+                                    <div class="card-header">
+                                        <h6>Value Analysis</h6>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="mb-2">
+                                            <small class="text-muted">Largest Inflow:</small>
+                                            <div class="text-success"><strong id="maxInflow">0</strong></div>
+                                        </div>
+                                        <div class="mb-2">
+                                            <small class="text-muted">Largest Outflow:</small>
+                                            <div class="text-danger"><strong id="maxOutflow">0</strong></div>
+                                        </div>
+                                        <hr>
+                                        <div>
+                                            <small class="text-muted">Flow Ratio:</small>
+                                            <div class="text-info"><strong id="flowRatio">0:0</strong></div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Charts -->
                         <div class="row">
                             <div class="col-md-6">
                                 <div class="card">
-                                    <div class="card-header">
-                                        <h5>Top 10 Inflow Sources</h5>
+                                    <div class="card-header d-flex justify-content-between align-items-center">
+                                        <h6>Top 10 Inflow Sources</h6>
+                                        <small class="text-muted" id="inflowChartStats">Total: 0</small>
                                     </div>
                                     <div class="card-body">
-                                        <canvas id="inflowChart" height="300"></canvas>
+                                        <canvas id="inflowChart" height="350"></canvas>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="card">
+                                    <div class="card-header d-flex justify-content-between align-items-center">
+                                        <h6>Top 10 Outflow Destinations</h6>
+                                        <small class="text-muted" id="outflowChartStats">Total: 0</small>
+                                    </div>
+                                    <div class="card-body">
+                                        <canvas id="outflowChart" height="350"></canvas>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Additional Charts -->
+                        <div class="row mt-4">
+                            <div class="col-md-6">
+                                <div class="card">
+                                    <div class="card-header">
+                                        <h6>Transaction Volume by Bank</h6>
+                                    </div>
+                                    <div class="card-body">
+                                        <canvas id="bankChart" height="300"></canvas>
                                     </div>
                                 </div>
                             </div>
                             <div class="col-md-6">
                                 <div class="card">
                                     <div class="card-header">
-                                        <h5>Top 10 Outflow Destinations</h5>
+                                        <h6>Transaction Channels Distribution</h6>
                                     </div>
                                     <div class="card-body">
-                                        <canvas id="outflowChart" height="300"></canvas>
+                                        <canvas id="channelChart" height="300"></canvas>
                                     </div>
                                 </div>
                             </div>
@@ -628,6 +924,60 @@
         </div>
     </div>
     
+    <!-- Contact Modal -->
+    <div class="modal fade" id="contactModal" tabindex="-1" aria-labelledby="contactModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="contactModalLabel">
+                        <i class="bi bi-person-lines-fill me-2"></i>
+                        พบปัญหา/ติดต่อผู้พัฒนาระบบ
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="contact-info">
+                        <div class="developer-card">
+                            <div class="developer-avatar">
+                                <i class="bi bi-person-circle"></i>
+                            </div>
+                            <div class="developer-details">
+                                <h6 class="developer-name">ร.ต.อ.พลวัฒน์ วิริยะโชติวิบูล</h6>
+                                <p class="developer-position">รอง สว.(สอบสวน) กก.3 บก.สอท.1</p>
+                            </div>
+                        </div>
+                        
+                        <div class="contact-methods">
+                            <div class="contact-item">
+                                <i class="bi bi-telephone-fill"></i>
+                                <span class="contact-label">โทรศัพท์:</span>
+                                <a href="tel:086-445-9351" class="contact-value">086-445-9351</a>
+                            </div>
+                            <div class="contact-item">
+                                <i class="bi bi-chat-dots-fill"></i>
+                                <span class="contact-label">LINE ID:</span>
+                                <span class="contact-value" id="lineId">bpp9351</span>
+                                <button class="btn btn-sm btn-outline-success ms-2" onclick="copyLineId()">
+                                    <i class="bi bi-clipboard"></i> Copy
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <div class="help-note">
+                            <div class="alert alert-info">
+                                <i class="bi bi-info-circle me-2"></i>
+                                <strong>หมายเหตุ:</strong> กรุณาระบุปัญหาที่พบและขั้นตอนการทำงานที่เกิดปัญหาให้ชัดเจน เพื่อความรวดเร็วในการแก้ไข
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">ปิด</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
     <!-- Scripts -->
     <script src="https://cdn.jsdelivr.net/npm/jquery@3.7.0/dist/jquery.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
@@ -635,7 +985,7 @@
     <script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap5.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.js"></script>
     
     <script>
         // Global variables
@@ -650,6 +1000,8 @@
         };
         let inflowChart = null;
         let outflowChart = null;
+        let bankChart = null;
+        let channelChart = null;
         
         // Bank code mapping
         const bankCodeMap = {
@@ -847,6 +1199,110 @@
             }
         }
         
+        // Calculate optimal column width based on content
+        function calculateColumnWidth(data, columnKey, headerText) {
+            if (!data || data.length === 0) return 120;
+            
+            // Create a temporary element to measure text width with exact table styling
+            const measureElement = document.createElement('div');
+            measureElement.style.position = 'absolute';
+            measureElement.style.visibility = 'hidden';
+            measureElement.style.whiteSpace = 'nowrap';
+            measureElement.style.font = '14px Kanit, sans-serif';
+            measureElement.style.fontWeight = '600'; // Header weight
+            measureElement.style.padding = '8px 10px';
+            measureElement.style.border = '1px solid transparent';
+            measureElement.style.boxSizing = 'border-box';
+            document.body.appendChild(measureElement);
+            
+            let maxWidth = 0;
+            
+            // Measure header width (with header font weight)
+            measureElement.textContent = headerText || columnKey;
+            measureElement.style.fontWeight = '600';
+            const headerWidth = measureElement.offsetWidth + 30; // Extra padding for sorting icons
+            maxWidth = Math.max(maxWidth, headerWidth);
+            
+            // Measure data values (sample first 50 rows for performance)
+            measureElement.style.fontWeight = '400'; // Normal font weight for data
+            const sampleSize = Math.min(data.length, 50);
+            for (let i = 0; i < sampleSize; i++) {
+                const value = data[i][columnKey] || '';
+                let displayValue = String(value);
+                
+                // Handle special formatting for numeric values
+                if (columnKey === 'deposit' || columnKey === 'withdrawal' || columnKey === 'total_amount') {
+                    displayValue = value; // Already formatted
+                }
+                
+                measureElement.textContent = displayValue;
+                const dataWidth = measureElement.offsetWidth + 10; // Normal padding
+                maxWidth = Math.max(maxWidth, dataWidth);
+            }
+            
+            document.body.removeChild(measureElement);
+            
+            // Set reasonable min/max limits with better scaling
+            return Math.min(Math.max(maxWidth, 120), 400);
+        }
+        
+        // Apply dynamic column widths to DataTable
+        function applyDynamicWidths(table, data, columns) {
+            const colWidths = {};
+            
+            columns.forEach((col, index) => {
+                const width = calculateColumnWidth(data, col.data, col.title);
+                colWidths[index] = width;
+            });
+            
+            // Force table to use our calculated widths
+            setTimeout(() => {
+                const container = $(table.table().container());
+                const headTable = container.find('.dataTables_scrollHead table');
+                const bodyTable = container.find('.dataTables_scrollBody table');
+                
+                // Apply widths directly to both header and body tables
+                const totalWidth = Object.values(colWidths).reduce((sum, width) => sum + width, 0);
+                
+                // Set table widths
+                headTable.css('width', totalWidth + 'px');
+                bodyTable.css('width', totalWidth + 'px');
+                
+                // Set column widths for header
+                headTable.find('th').each(function(index) {
+                    const width = colWidths[index] || 120;
+                    $(this).css({
+                        'width': width + 'px',
+                        'min-width': width + 'px',
+                        'max-width': width + 'px'
+                    });
+                });
+                
+                // Set column widths for body
+                bodyTable.find('tr').each(function() {
+                    $(this).find('td').each(function(index) {
+                        const width = colWidths[index] || 120;
+                        $(this).css({
+                            'width': width + 'px',
+                            'min-width': width + 'px',
+                            'max-width': width + 'px'
+                        });
+                    });
+                });
+                
+                // Sync scroll containers
+                const headInner = container.find('.dataTables_scrollHeadInner');
+                const bodyInner = container.find('.dataTables_scrollBodyInner');
+                
+                headInner.css('width', totalWidth + 'px');
+                bodyInner.css('width', totalWidth + 'px');
+                
+                // Final adjustment
+                table.columns.adjust();
+                
+            }, 100);
+        }
+
         // Initialize all tables
         function initializeTables() {
             // Destroy existing tables if any
@@ -901,14 +1357,16 @@
                 scrollX: true,
                 scrollCollapse: false,
                 language: thaiLanguage,
-                autoWidth: false,
+                autoWidth: true,
                 columnDefs: [
-                    { targets: '_all', className: 'text-nowrap', width: '120px' }
+                    { targets: '_all', className: 'text-nowrap' }
                 ],
                 initComplete: function() {
                     // Fix column alignment after initialization
                     var api = this.api();
-                    api.columns.adjust();
+                    
+                    // Apply dynamic column widths
+                    applyDynamicWidths(api, rawData, rawColumns);
                     
                     // Setup scroll sync
                     var scrollHead = $(api.table().container()).find('.dataTables_scrollHead');
@@ -917,11 +1375,6 @@
                     scrollBody.on('scroll', function() {
                         scrollHead.scrollLeft($(this).scrollLeft());
                     });
-                    
-                    // Force initial column width sync
-                    setTimeout(function() {
-                        api.columns.adjust();
-                    }, 10);
                 }
             });
             
@@ -939,12 +1392,16 @@
                 scrollX: true,
                 scrollCollapse: false,
                 language: thaiLanguage,
-                autoWidth: false,
+                autoWidth: true,
                 columnDefs: [
-                    { targets: '_all', className: 'text-nowrap', width: '120px' }
+                    { targets: '_all', className: 'text-nowrap' }
                 ],
                 initComplete: function() {
                     var api = this.api();
+                    
+                    // Apply dynamic column widths
+                    applyDynamicWidths(api, inflowData, inflowColumns);
+                    
                     var scrollHead = $(api.table().container()).find('.dataTables_scrollHead');
                     var scrollBody = $(api.table().container()).find('.dataTables_scrollBody');
                     
@@ -952,11 +1409,6 @@
                     scrollBody.on('scroll', function() {
                         scrollHead.scrollLeft($(this).scrollLeft());
                     });
-                    
-                    // Fix alignment after a short delay
-                    setTimeout(function() {
-                        fixColumnAlignment(api);
-                    }, 50);
                 }
             });
             
@@ -974,43 +1426,45 @@
                 scrollX: true,
                 scrollCollapse: false,
                 language: thaiLanguage,
-                autoWidth: false,
+                autoWidth: true,
                 columnDefs: [
-                    { targets: '_all', className: 'text-nowrap', width: '120px' }
+                    { targets: '_all', className: 'text-nowrap' }
                 ],
                 initComplete: function() {
                     var api = this.api();
-                    api.columns.adjust();
+                    
+                    // Apply dynamic column widths
+                    applyDynamicWidths(api, outflowData, outflowColumns);
+                    
                     var scrollHead = $(api.table().container()).find('.dataTables_scrollHead');
                     var scrollBody = $(api.table().container()).find('.dataTables_scrollBody');
                     scrollBody.on('scroll', function() {
                         scrollHead.scrollLeft($(this).scrollLeft());
                     });
-                    setTimeout(function() {
-                        api.columns.adjust();
-                    }, 10);
                 }
             });
             
             // PV INFLOW
             const pvInflowData = createPivotInflow(inflowData);
+            const pvInflowColumns = [
+                {data: 'frombankcode', title: 'frombankcode'},
+                {data: 'fromaccountno', title: 'fromaccountno'},
+                {data: 'fromaccountname', title: 'fromaccountname'},
+                {data: 'transaction_count', title: 'transaction_count'},
+                {
+                    data: 'total_amount', 
+                    title: 'total_amount',
+                    render: function(data) {
+                        return '<span class="deposit-value">' + data + '</span>';
+                    }
+                },
+                {data: 'first_date', title: 'first_date'},
+                {data: 'last_date', title: 'last_date'}
+            ];
+            
             dataTableInstances.pvInflow = $('#pvInflowTable').DataTable({
                 data: pvInflowData,
-                columns: [
-                    {data: 'frombankcode', title: 'frombankcode'},
-                    {data: 'fromaccountno', title: 'fromaccountno'},
-                    {data: 'fromaccountname', title: 'fromaccountname'},
-                    {data: 'transaction_count', title: 'transaction_count'},
-                    {
-                        data: 'total_amount', 
-                        title: 'total_amount',
-                        render: function(data) {
-                            return '<span class="deposit-value">' + data + '</span>';
-                        }
-                    },
-                    {data: 'first_date', title: 'first_date'},
-                    {data: 'last_date', title: 'last_date'}
-                ],
+                columns: pvInflowColumns,
                 order: [[4, 'desc']],
                 pageLength: -1,
                 dom: 'rt',
@@ -1018,43 +1472,45 @@
                 scrollX: true,
                 scrollCollapse: false,
                 language: thaiLanguage,
-                autoWidth: false,
+                autoWidth: true,
                 columnDefs: [
-                    { targets: '_all', className: 'text-nowrap', width: '120px' }
+                    { targets: '_all', className: 'text-nowrap' }
                 ],
                 initComplete: function() {
                     var api = this.api();
-                    api.columns.adjust();
+                    
+                    // Apply dynamic column widths
+                    applyDynamicWidths(api, pvInflowData, pvInflowColumns);
+                    
                     var scrollHead = $(api.table().container()).find('.dataTables_scrollHead');
                     var scrollBody = $(api.table().container()).find('.dataTables_scrollBody');
                     scrollBody.on('scroll', function() {
                         scrollHead.scrollLeft($(this).scrollLeft());
                     });
-                    setTimeout(function() {
-                        api.columns.adjust();
-                    }, 10);
                 }
             });
             
             // PV OUTFLOW
             const pvOutflowData = createPivotOutflow(outflowData);
+            const pvOutflowColumns = [
+                {data: 'tobankcode', title: 'tobankcode'},
+                {data: 'toaccountno', title: 'toaccountno'},
+                {data: 'toaccountname', title: 'toaccountname'},
+                {data: 'transaction_count', title: 'transaction_count'},
+                {
+                    data: 'total_amount', 
+                    title: 'total_amount',
+                    render: function(data) {
+                        return '<span class="withdrawal-value">' + data + '</span>';
+                    }
+                },
+                {data: 'first_date', title: 'first_date'},
+                {data: 'last_date', title: 'last_date'}
+            ];
+            
             dataTableInstances.pvOutflow = $('#pvOutflowTable').DataTable({
                 data: pvOutflowData,
-                columns: [
-                    {data: 'tobankcode', title: 'tobankcode'},
-                    {data: 'toaccountno', title: 'toaccountno'},
-                    {data: 'toaccountname', title: 'toaccountname'},
-                    {data: 'transaction_count', title: 'transaction_count'},
-                    {
-                        data: 'total_amount', 
-                        title: 'total_amount',
-                        render: function(data) {
-                            return '<span class="withdrawal-value">' + data + '</span>';
-                        }
-                    },
-                    {data: 'first_date', title: 'first_date'},
-                    {data: 'last_date', title: 'last_date'}
-                ],
+                columns: pvOutflowColumns,
                 order: [[4, 'desc']],
                 pageLength: -1,
                 dom: 'rt',
@@ -1062,21 +1518,21 @@
                 scrollX: true,
                 scrollCollapse: false,
                 language: thaiLanguage,
-                autoWidth: false,
+                autoWidth: true,
                 columnDefs: [
-                    { targets: '_all', className: 'text-nowrap', width: '120px' }
+                    { targets: '_all', className: 'text-nowrap' }
                 ],
                 initComplete: function() {
                     var api = this.api();
-                    api.columns.adjust();
+                    
+                    // Apply dynamic column widths
+                    applyDynamicWidths(api, pvOutflowData, pvOutflowColumns);
+                    
                     var scrollHead = $(api.table().container()).find('.dataTables_scrollHead');
                     var scrollBody = $(api.table().container()).find('.dataTables_scrollBody');
                     scrollBody.on('scroll', function() {
                         scrollHead.scrollLeft($(this).scrollLeft());
                     });
-                    setTimeout(function() {
-                        api.columns.adjust();
-                    }, 10);
                 }
             });
         }
@@ -1351,7 +1807,7 @@
         function initializeDashboard() {
             if (!rawData || rawData.length === 0) return;
             
-            // Calculate totals
+            // Calculate basic totals
             const totalRecords = rawData.length;
             const inflowData = rawData.filter(row => parseFloat(row.deposit.replace(/,/g, '')) > 0);
             const outflowData = rawData.filter(row => parseFloat(row.withdrawal.replace(/,/g, '')) > 0);
@@ -1360,15 +1816,109 @@
             const totalOutflowAmount = outflowData.reduce((sum, row) => sum + parseFloat(row.withdrawal.replace(/,/g, '')), 0);
             const netFlow = totalInflowAmount - totalOutflowAmount;
             
-            // Update dashboard cards
+            // Calculate detailed statistics
+            const inflowSources = new Set(inflowData.map(row => row.fromaccountno)).size;
+            const outflowDestinations = new Set(outflowData.map(row => row.toaccountno)).size;
+            
+            const inflowCount = inflowData.length;
+            const outflowCount = outflowData.length;
+            const inflowPercentage = totalRecords > 0 ? ((inflowCount / totalRecords) * 100).toFixed(1) : 0;
+            const outflowPercentage = totalRecords > 0 ? ((outflowCount / totalRecords) * 100).toFixed(1) : 0;
+            
+            const avgInflow = inflowCount > 0 ? (totalInflowAmount / inflowCount) : 0;
+            const avgOutflow = outflowCount > 0 ? (totalOutflowAmount / outflowCount) : 0;
+            
+            // Bank analysis
+            const bankStats = {};
+            rawData.forEach(row => {
+                const fromBank = row.frombankcode || 'Unknown';
+                const toBank = row.tobankcode || 'Unknown';
+                bankStats[fromBank] = (bankStats[fromBank] || 0) + 1;
+                bankStats[toBank] = (bankStats[toBank] || 0) + 1;
+            });
+            const mostActiveBank = Object.entries(bankStats).sort((a, b) => b[1] - a[1])[0];
+            const totalBanks = Object.keys(bankStats).length;
+            
+            // Channel analysis
+            const channelStats = {};
+            rawData.forEach(row => {
+                const channel = row.txchannel || 'Unknown';
+                channelStats[channel] = (channelStats[channel] || 0) + 1;
+            });
+            
+            // Time analysis
+            const dates = rawData.map(row => row.txdate).filter(date => date);
+            const uniqueDates = [...new Set(dates)].sort();
+            const dateRange = uniqueDates.length > 0 ? `${uniqueDates[0]} - ${uniqueDates[uniqueDates.length - 1]}` : '-';
+            
+            const dailyStats = {};
+            dates.forEach(date => {
+                dailyStats[date] = (dailyStats[date] || 0) + 1;
+            });
+            const peakDay = Object.entries(dailyStats).sort((a, b) => b[1] - a[1])[0];
+            const dailyAverage = uniqueDates.length > 0 ? Math.round(totalRecords / uniqueDates.length) : 0;
+            
+            // Value analysis
+            const maxInflow = Math.max(...inflowData.map(row => parseFloat(row.deposit.replace(/,/g, ''))), 0);
+            const maxOutflow = Math.max(...outflowData.map(row => parseFloat(row.withdrawal.replace(/,/g, ''))), 0);
+            const flowRatio = totalOutflowAmount > 0 ? (totalInflowAmount / totalOutflowAmount).toFixed(2) : '∞';
+            
+            // Update dashboard cards - basic
             document.getElementById('totalRecords').textContent = totalRecords.toLocaleString();
             document.getElementById('totalInflowAmount').textContent = totalInflowAmount.toLocaleString('en-US', {minimumFractionDigits: 2});
             document.getElementById('totalOutflowAmount').textContent = totalOutflowAmount.toLocaleString('en-US', {minimumFractionDigits: 2});
             document.getElementById('netFlow').textContent = netFlow.toLocaleString('en-US', {minimumFractionDigits: 2});
+            document.getElementById('inflowSources').textContent = inflowSources.toLocaleString();
+            document.getElementById('outflowDestinations').textContent = outflowDestinations.toLocaleString();
+            
+            // Update detailed statistics
+            document.getElementById('inflowCount').textContent = inflowCount.toLocaleString();
+            document.getElementById('outflowCount').textContent = outflowCount.toLocaleString();
+            document.getElementById('inflowPercentage').textContent = inflowPercentage + '%';
+            document.getElementById('outflowPercentage').textContent = outflowPercentage + '%';
+            document.getElementById('avgInflow').textContent = avgInflow.toLocaleString('en-US', {minimumFractionDigits: 0, maximumFractionDigits: 0});
+            document.getElementById('avgOutflow').textContent = avgOutflow.toLocaleString('en-US', {minimumFractionDigits: 0, maximumFractionDigits: 0});
+            
+            document.getElementById('mostActiveBank').textContent = mostActiveBank ? mostActiveBank[0] : '-';
+            document.getElementById('totalBanks').textContent = totalBanks;
+            
+            // Update channel list
+            const channelListHtml = Object.entries(channelStats)
+                .sort((a, b) => b[1] - a[1])
+                .slice(0, 5)
+                .map(([channel, count]) => `<div><small>${channel}: ${count}</small></div>`)
+                .join('');
+            document.getElementById('channelList').innerHTML = channelListHtml || '<small class="text-muted">No data</small>';
+            
+            document.getElementById('dateRange').textContent = dateRange;
+            document.getElementById('peakDay').textContent = peakDay ? `${peakDay[0]} (${peakDay[1]} txns)` : '-';
+            document.getElementById('dailyAverage').textContent = dailyAverage.toLocaleString();
+            
+            document.getElementById('maxInflow').textContent = maxInflow.toLocaleString('en-US', {minimumFractionDigits: 2});
+            document.getElementById('maxOutflow').textContent = maxOutflow.toLocaleString('en-US', {minimumFractionDigits: 2});
+            document.getElementById('flowRatio').textContent = flowRatio + ':1';
             
             // Create charts
             createInflowChart(inflowData);
             createOutflowChart(outflowData);
+            createBankChart(bankStats);
+            createChannelChart(channelStats);
+        }
+        
+        // Generate distinct colors for charts
+        function generateDistinctColors(count, baseHue = 0, saturation = 70, lightness = 50) {
+            const colors = [];
+            const hueStep = 360 / Math.max(count, 1);
+            
+            for (let i = 0; i < count; i++) {
+                const hue = (baseHue + (i * hueStep)) % 360;
+                // Vary saturation and lightness slightly for more distinction
+                const sat = saturation + (i % 3 - 1) * 10; // ±10
+                const light = lightness + (i % 2) * 15; // 0 or +15
+                colors.push(`hsl(${hue}, ${Math.max(30, Math.min(90, sat))}%, ${Math.max(35, Math.min(75, light))}%)`);
+            }
+            
+            return colors;
         }
         
         // Create inflow chart
@@ -1389,47 +1939,50 @@
                 .sort((a, b) => b.amount - a.amount)
                 .slice(0, 10);
             
+            const totalAmount = sortedData.reduce((sum, item) => sum + item.amount, 0);
+            
+            // Update stats
+            document.getElementById('inflowChartStats').textContent = `Total: ${totalAmount.toLocaleString('en-US', {minimumFractionDigits: 2})}`;
+            
             const ctx = document.getElementById('inflowChart').getContext('2d');
             
             if (inflowChart) {
                 inflowChart.destroy();
             }
             
+            // Generate distinctive colors for inflow pie chart (green base)
+            const colors = generateDistinctColors(sortedData.length, 120, 75, 55);
+            
             inflowChart = new Chart(ctx, {
-                type: 'bar',
+                type: 'pie',
                 data: {
-                    labels: sortedData.map(item => item.name.length > 20 ? item.name.substring(0, 20) + '...' : item.name),
+                    labels: sortedData.map(item => item.name.length > 15 ? item.name.substring(0, 15) + '...' : item.name),
                     datasets: [{
-                        label: 'Inflow Amount',
                         data: sortedData.map(item => item.amount),
-                        backgroundColor: 'rgba(39, 174, 96, 0.8)',
-                        borderColor: 'rgba(39, 174, 96, 1)',
-                        borderWidth: 1
+                        backgroundColor: colors.slice(0, sortedData.length),
+                        borderWidth: 2,
+                        borderColor: '#fff'
                     }]
                 },
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
-                    scales: {
-                        y: {
-                            beginAtZero: true,
-                            ticks: {
-                                callback: function(value) {
-                                    return value.toLocaleString();
+                    plugins: {
+                        legend: {
+                            position: 'right',
+                            labels: {
+                                boxWidth: 12,
+                                font: {
+                                    size: 11
                                 }
                             }
                         },
-                        x: {
-                            ticks: {
-                                maxRotation: 45
-                            }
-                        }
-                    },
-                    plugins: {
                         tooltip: {
                             callbacks: {
                                 label: function(context) {
-                                    return 'Amount: ' + context.parsed.y.toLocaleString('en-US', {minimumFractionDigits: 2});
+                                    const amount = context.parsed;
+                                    const percentage = ((amount / totalAmount) * 100).toFixed(1);
+                                    return `${context.label}: ${amount.toLocaleString('en-US', {minimumFractionDigits: 2})} (${percentage}%)`;
                                 }
                             }
                         }
@@ -1456,47 +2009,50 @@
                 .sort((a, b) => b.amount - a.amount)
                 .slice(0, 10);
             
+            const totalAmount = sortedData.reduce((sum, item) => sum + item.amount, 0);
+            
+            // Update stats
+            document.getElementById('outflowChartStats').textContent = `Total: ${totalAmount.toLocaleString('en-US', {minimumFractionDigits: 2})}`;
+            
             const ctx = document.getElementById('outflowChart').getContext('2d');
             
             if (outflowChart) {
                 outflowChart.destroy();
             }
             
+            // Generate distinctive colors for outflow pie chart (red base)
+            const colors = generateDistinctColors(sortedData.length, 0, 75, 55);
+            
             outflowChart = new Chart(ctx, {
-                type: 'bar',
+                type: 'pie',
                 data: {
-                    labels: sortedData.map(item => item.name.length > 20 ? item.name.substring(0, 20) + '...' : item.name),
+                    labels: sortedData.map(item => item.name.length > 15 ? item.name.substring(0, 15) + '...' : item.name),
                     datasets: [{
-                        label: 'Outflow Amount',
                         data: sortedData.map(item => item.amount),
-                        backgroundColor: 'rgba(231, 76, 60, 0.8)',
-                        borderColor: 'rgba(231, 76, 60, 1)',
-                        borderWidth: 1
+                        backgroundColor: colors.slice(0, sortedData.length),
+                        borderWidth: 2,
+                        borderColor: '#fff'
                     }]
                 },
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
-                    scales: {
-                        y: {
-                            beginAtZero: true,
-                            ticks: {
-                                callback: function(value) {
-                                    return value.toLocaleString();
+                    plugins: {
+                        legend: {
+                            position: 'right',
+                            labels: {
+                                boxWidth: 12,
+                                font: {
+                                    size: 11
                                 }
                             }
                         },
-                        x: {
-                            ticks: {
-                                maxRotation: 45
-                            }
-                        }
-                    },
-                    plugins: {
                         tooltip: {
                             callbacks: {
                                 label: function(context) {
-                                    return 'Amount: ' + context.parsed.y.toLocaleString('en-US', {minimumFractionDigits: 2});
+                                    const amount = context.parsed;
+                                    const percentage = ((amount / totalAmount) * 100).toFixed(1);
+                                    return `${context.label}: ${amount.toLocaleString('en-US', {minimumFractionDigits: 2})} (${percentage}%)`;
                                 }
                             }
                         }
@@ -1505,9 +2061,157 @@
             });
         }
         
+        // Create bank chart
+        function createBankChart(bankStats) {
+            const sortedData = Object.entries(bankStats)
+                .sort((a, b) => b[1] - a[1])
+                .slice(0, 10);
+            
+            const ctx = document.getElementById('bankChart').getContext('2d');
+            
+            if (bankChart) {
+                bankChart.destroy();
+            }
+            
+            // Generate distinctive colors for bank chart (blue base)
+            const colors = generateDistinctColors(sortedData.length, 240, 80, 60);
+            
+            bankChart = new Chart(ctx, {
+                type: 'pie',
+                data: {
+                    labels: sortedData.map(item => item[0]),
+                    datasets: [{
+                        data: sortedData.map(item => item[1]),
+                        backgroundColor: colors.slice(0, sortedData.length),
+                        borderWidth: 2,
+                        borderColor: '#fff'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'right',
+                            labels: {
+                                boxWidth: 12,
+                                font: {
+                                    size: 11
+                                }
+                            }
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    const total = sortedData.reduce((sum, item) => sum + item[1], 0);
+                                    const percentage = ((context.parsed / total) * 100).toFixed(1);
+                                    return `${context.label}: ${context.parsed.toLocaleString()} txns (${percentage}%)`;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+        
+        // Create channel chart
+        function createChannelChart(channelStats) {
+            const sortedData = Object.entries(channelStats)
+                .sort((a, b) => b[1] - a[1])
+                .slice(0, 8);
+            
+            const ctx = document.getElementById('channelChart').getContext('2d');
+            
+            if (channelChart) {
+                channelChart.destroy();
+            }
+            
+            // Generate distinctive colors for channel chart (purple base)
+            const colors = generateDistinctColors(sortedData.length, 280, 70, 58);
+            
+            channelChart = new Chart(ctx, {
+                type: 'pie',
+                data: {
+                    labels: sortedData.map(item => item[0]),
+                    datasets: [{
+                        data: sortedData.map(item => item[1]),
+                        backgroundColor: colors.slice(0, sortedData.length),
+                        borderWidth: 2,
+                        borderColor: '#fff'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                boxWidth: 12,
+                                font: {
+                                    size: 11
+                                }
+                            }
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    const total = sortedData.reduce((sum, item) => sum + item[1], 0);
+                                    const percentage = ((context.parsed / total) * 100).toFixed(1);
+                                    return `${context.label}: ${context.parsed.toLocaleString()} txns (${percentage}%)`;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+        
+        // Show contact modal
+        function showContactModal() {
+            const modal = new bootstrap.Modal(document.getElementById('contactModal'));
+            modal.show();
+        }
+        
+        // Copy LINE ID to clipboard
+        function copyLineId() {
+            const lineId = document.getElementById('lineId').textContent;
+            const textArea = document.createElement('textarea');
+            textArea.value = lineId;
+            textArea.style.position = 'fixed';
+            textArea.style.left = '-9999px';
+            document.body.appendChild(textArea);
+            textArea.select();
+            
+            try {
+                document.execCommand('copy');
+                
+                // Show success feedback
+                const button = event.target.closest('button');
+                const originalContent = button.innerHTML;
+                button.innerHTML = '<i class="bi bi-check"></i> Copied!';
+                button.classList.remove('btn-outline-success');
+                button.classList.add('btn-success');
+                
+                setTimeout(() => {
+                    button.innerHTML = originalContent;
+                    button.classList.remove('btn-success');
+                    button.classList.add('btn-outline-success');
+                }, 2000);
+                
+            } catch (err) {
+                console.error('Error copying LINE ID:', err);
+                alert('เกิดข้อผิดพลาดในการคัดลอก LINE ID');
+            }
+            
+            document.body.removeChild(textArea);
+        }
+        
         // Make functions available globally for button onclick
         window.copyToClipboard = copyToClipboard;
         window.exportToExcel = exportToExcel;
+        window.showContactModal = showContactModal;
+        window.copyLineId = copyLineId;
     </script>
 </body>
 </html>
